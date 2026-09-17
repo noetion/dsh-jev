@@ -1,7 +1,7 @@
 {
   "name": "dsh-jev",
   "version": "0.1.0",
-  "description": "DeepSeek Harness plugin that connects any DSH agent to TypeSafe Jev.",
+  "description": "DeepSeek Harness bundle that registers jev_ask for TypeSafe Jev noul, choice, and score answers.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -30,7 +30,9 @@
     "test": "node --experimental-strip-types --test tests/domain.test.ts tests/client.test.ts tests/plugin.test.ts tests/apply.test.ts",
     "live": "node --experimental-strip-types scripts/live-smoke.ts",
     "verify-boot": "node --experimental-strip-types scripts/verify-boot.ts",
-    "check": "npm run typecheck && npm run test && npm run build"
+    "verify-git-install": "node --experimental-strip-types scripts/verify-git-install.ts",
+    "check": "npm run typecheck && npm run test && npm run build && npm run adopt-check",
+    "adopt-check": "node --experimental-strip-types scripts/adopt-check.ts"
   },
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
