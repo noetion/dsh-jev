@@ -81,7 +81,7 @@ export function apply(ctx: Context, config?: PluginConfig): void {
         credentials: ctx.get('credentials') as { resolve(ref: string): Promise<{ value: string } | undefined> } | undefined,
       })
       if (apiKey === undefined) {
-        throw new JevAuthError()
+        throw new JevAuthError(pluginConfig.apiKeyEnv)
       }
       return evaluateJev({
         request,
@@ -89,6 +89,7 @@ export function apply(ctx: Context, config?: PluginConfig): void {
         endpoint: pluginConfig.endpoint,
         fetchImpl: hostFetch(),
         signal: exec.signal,
+        envName: pluginConfig.apiKeyEnv,
       })
     },
   }))
@@ -98,9 +99,7 @@ export function apply(ctx: Context, config?: PluginConfig): void {
     skills.registerProvider(() => createSkillProvider())
   }
 
-  const listed = ctx.tools.get('jev_ask') !== undefined
-  console.log(`[jev] registered jev_ask listed=${listed}`)
-  if (!listed) {
+  if (ctx.tools.get('jev_ask') === undefined) {
     throw new JevParseError('tools', 'jev_ask did not land in the registry')
   }
 }

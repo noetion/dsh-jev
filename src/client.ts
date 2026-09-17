@@ -24,7 +24,8 @@ export class JevHttpError extends Error {
   readonly body: string
 
   constructor(status: number, body: string) {
-    super(`TypeSafe returned ${status}`)
+    const clipped = body.trim().slice(0, 500)
+    super(clipped === '' ? `TypeSafe returned ${status}` : `TypeSafe returned ${status}: ${clipped}`)
     this.name = 'JevHttpError'
     this.status = status
     this.body = body
@@ -32,9 +33,12 @@ export class JevHttpError extends Error {
 }
 
 export class JevAuthError extends Error {
-  constructor() {
-    super('TYPESAFE_API_KEY is not configured')
+  readonly envName: string
+
+  constructor(envName = 'TYPESAFE_API_KEY') {
+    super(`${envName} is not configured. Set it in the process environment or in DSH credentials under that name.`)
     this.name = 'JevAuthError'
+    this.envName = envName
   }
 }
 
@@ -49,9 +53,11 @@ export async function evaluateJev(options: {
   fetchImpl?: FetchLike
   signal?: AbortSignal
   attempt?: number
+  envName?: string
 }): Promise<JevResult> {
+  const envName = options.envName ?? 'TYPESAFE_API_KEY'
   if (options.apiKey.trim() === '') {
-    throw new JevAuthError()
+    throw new JevAuthError(envName)
   }
   const attempt = options.attempt ?? 0
   const endpoint = options.endpoint ?? DEFAULT_ENDPOINT
@@ -80,7 +86,7 @@ export async function evaluateJev(options: {
     return evaluateJev({ ...options, attempt: attempt + 1 })
   }
   if (response.status === 401) {
-    throw new JevAuthError()
+    throw new JevAuthError(envName)
   }
   if (!response.ok) {
     throw new JevHttpError(response.status, text)

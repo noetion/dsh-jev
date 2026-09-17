@@ -40,4 +40,5 @@ test('bundled jev skill is loadable from disk', async () => {
   const skill = await provider.get({ name: 'jev' })
   assert.equal(skill?.name, 'jev')
   assert.match(skill?.body ?? '', /jev_ask/)
+  assert.match(skill?.body ?? '', /Do not put API keys/)
 })
