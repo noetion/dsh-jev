@@ -1,0 +1,5 @@
+ts	phase	decision	why	evidence	result
+2026-09-17T15:00:00Z	frame	Treat Jev as a DSH tool and skill, not an LLM adapter	Jev returns typed noul/choice/score JSON and cannot stream chat tokens	https://docs.typesafe.ai/api.md	open
+2026-09-17T15:10:00Z	scaffold	Start from create-dsh-plugin tool template pinned to dsh-tools 0.1.5-rc.2	npm latest for dsh-tools is stale 0.0.1-rc.1	package.json	kept
+2026-09-17T15:35:00Z	harness	Live TypeSafe call returned jev-1.13.0 with typed noul/choice/score	Prove the HTTP client against the real API	results/live-smoke.json	VERIFIED
+2026-09-17T15:42:00Z	boot	Create the verify profile with plugin add, not dump-default-config	dsh 0.1.5-rc.2 says a missing profile is created by plugin add	scripts/verify-boot.ts	kept

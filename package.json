@@ -1,0 +1,61 @@
+{
+  "name": "dsh-jev",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness plugin that connects any DSH agent to TypeSafe Jev.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "skills",
+    "cordis.patch.yml",
+    "dsh-plugin.naming.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-skills.mjs",
+    "prepare": "npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --experimental-strip-types --test tests/domain.test.ts tests/client.test.ts tests/plugin.test.ts tests/apply.test.ts",
+    "live": "node --experimental-strip-types scripts/live-smoke.ts",
+    "verify-boot": "node --experimental-strip-types scripts/verify-boot.ts",
+    "check": "npm run typecheck && npm run test && npm run build"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noetion/dsh-jev.git"
+  },
+  "homepage": "https://github.com/noetion/dsh-jev",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "typesafe",
+    "jev"
+  ],
+  "dependencies": {
+    "@deepseek-ai/dsh-tools": "0.1.5-rc.2"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "model": "jev-1.13.0",
+  "department": "billing",
+  "frustration": 1,
+  "urgency": 1,
+  "usage": {
+    "input_tokens": 424,
+    "output_tokens": 73
+  }
+}

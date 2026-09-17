@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "policy": "dsh-plugin-naming/v1",
+  "plugin": {
+    "namespace": "noetion",
+    "name": "jev",
+    "coordinate": "noetion/jev",
+    "packageName": "dsh-jev"
+  },
+  "names": {
+    "pluginNames": ["jev"],
+    "loaderIds": ["jev"],
+    "services": [],
+    "tools": ["jev_ask"],
+    "commands": [],
+    "skills": ["jev"],
+    "skillProviders": ["jev-bundled"],
+    "events": [],
+    "settingsNamespaces": [],
+    "routes": []
+  }
+}
