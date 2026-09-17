@@ -126,4 +126,4 @@ MIT. See `LICENSE`.
 
 Open a GitHub issue for bugs and questions. There is no response-time promise. Pull requests are welcome if they include `pnpm run check`.
 
-Report a vulnerability through a private GitHub security advisory rather than a public issue.
+To report a security vulnerability, use this repository's private advisory form if it is available, or email the address on the `noetion` GitHub profile. Do not open a public issue for an unpatched vulnerability.
