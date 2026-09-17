@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { apply } from '../src/index.ts'
+import { JevAuthError } from '../src/client.ts'
 
 test('apply registers jev_ask and execute returns a parsed noul', async () => {
   let tool: { name?: string; execute?: Function } | undefined
@@ -51,5 +52,41 @@ test('apply registers jev_ask and execute returns a parsed noul', async () => {
     }
   } finally {
     globalThis.fetch = originalFetch
+  }
+})
+
+test('execute throws JevAuthError that names the env when the key is missing', async () => {
+  let tool: { execute?: Function } | undefined
+  const ctx = {
+    tools: {
+      register(definition: { execute?: Function }) {
+        tool = definition
+        return () => {}
+      },
+      get(name: string) {
+        return name === 'jev_ask' ? tool : undefined
+      },
+    },
+    get() {
+      return undefined
+    },
+  }
+  apply(ctx as never, { model: 'jev-latest', endpoint: 'https://api.typesafe.ai/v1/systemone', apiKeyEnv: 'DSH_JEV_TEST_KEY' })
+  const previous = process.env.DSH_JEV_TEST_KEY
+  delete process.env.DSH_JEV_TEST_KEY
+  try {
+    await assert.rejects(
+      () => tool!.execute!(
+        {
+          state: 'x',
+          questions: { is_urgent: { type: 'noul', instructions: 'urgent?' } },
+        },
+        { signal: new AbortController().signal },
+      ),
+      (error: unknown) => error instanceof JevAuthError && /DSH_JEV_TEST_KEY/.test(error.message),
+    )
+  } finally {
+    if (previous === undefined) delete process.env.DSH_JEV_TEST_KEY
+    else process.env.DSH_JEV_TEST_KEY = previous
   }
 })

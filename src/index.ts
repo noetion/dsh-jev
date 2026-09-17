@@ -81,7 +81,7 @@ export function apply(ctx: Context, config?: PluginConfig): void {
         credentials: ctx.get('credentials') as { resolve(ref: string): Promise<{ value: string } | undefined> } | undefined,
       })
       if (apiKey === undefined) {
-        throw new JevAuthError()
+        throw new JevAuthError(pluginConfig.apiKeyEnv)
       }
       return evaluateJev({
         request,
@@ -89,6 +89,7 @@ export function apply(ctx: Context, config?: PluginConfig): void {
         endpoint: pluginConfig.endpoint,
         fetchImpl: hostFetch(),
         signal: exec.signal,
+        envName: pluginConfig.apiKeyEnv,
       })
     },
   }))

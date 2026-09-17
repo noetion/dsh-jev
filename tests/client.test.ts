@@ -57,18 +57,19 @@ test('posts the wire body and returns the parsed noul', async () => {
 
 test('throws JevAuthError on an empty key and on HTTP 401', async () => {
   await assert.rejects(
-    () => evaluateJev({ request, apiKey: '  ', fetchImpl: async () => {
+    () => evaluateJev({ request, apiKey: '  ', envName: 'CUSTOM_KEY', fetchImpl: async () => {
       throw new Error('should not fetch')
     } }),
-    JevAuthError,
+    (error: unknown) => error instanceof JevAuthError && error.envName === 'CUSTOM_KEY' && /CUSTOM_KEY/.test(error.message),
   )
   await assert.rejects(
     () => evaluateJev({
       request,
       apiKey: 'test-key',
+      envName: 'CUSTOM_KEY',
       fetchImpl: async () => ({ ok: false, status: 401, text: async () => 'nope' }),
     }),
-    JevAuthError,
+    (error: unknown) => error instanceof JevAuthError && error.envName === 'CUSTOM_KEY',
   )
 })
 
@@ -83,7 +84,11 @@ test('throws JevHttpError on 422 without retrying', async () => {
         return { ok: false, status: 422, text: async () => '{"error":"bad question"}' }
       },
     }),
-    (error: unknown) => error instanceof JevHttpError && error.status === 422 && error.body === '{"error":"bad question"}',
+    (error: unknown) =>
+      error instanceof JevHttpError
+      && error.status === 422
+      && error.body === '{"error":"bad question"}'
+      && error.message.includes('{"error":"bad question"}'),
   )
   assert.equal(calls, 1)
 })
