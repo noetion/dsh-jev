@@ -23,4 +23,5 @@ jobs:
           cache: pnpm
       - run: pnpm install
       - run: pnpm run check
+      - run: pnpm run verify-boot
       - run: pnpm run verify-git-install
