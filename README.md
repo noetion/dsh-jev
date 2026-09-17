@@ -1,30 +1,46 @@
 # dsh-jev
 
-A DeepSeek Harness plugin that gives any DSH agent a native Jev capability.
+dsh-jev is a DeepSeek Harness bundle that registers the `jev_ask` tool. On a profile that loads this bundle, a DSH agent can send typed noul, choice, and score questions to TypeSafe Jev.
 
-Jev is TypeSafe's System One model. It returns typed noul, choice, and score answers. It does not generate chat or code. This plugin registers `jev_ask` so the session LLM, Code mode, and other DSH agents can call Jev the same way they call `bash`.
+Jev is TypeSafe's System One model. It returns structured answers. It does not generate chat or code.
 
-## Install
+This package is version 0.1.0. It targets DSH `0.1.5-rc.2` (the npm `next` dist-tag), Node 22.19 or Node 24, and a TypeSafe API key.
 
-Build once, then add the package to a profile.
+## Install from GitHub
+
+Pin a commit so a later push cannot change what you run.
+
+```sh
+dsh plugin --profile web add github:noetion/dsh-jev#<commit>
+```
+
+Replace `<commit>` with a SHA from `main`.
+
+The first add fails until pnpm allows this package's `prepare` script. Copy the exact key from the pnpm error into the profile's `pnpm-workspace.yaml` under `allowBuilds`. The key is often `dsh-jev`. Some pnpm versions print a longer `dsh-jev@github:...` key. Use that exact string.
+
+```yaml
+allowBuilds:
+  dsh-jev: true
+```
+
+Then run the same `dsh plugin add` command again. Treat that allowlist as permission to run this package's build on your machine at install time.
+
+Set `TYPESAFE_API_KEY` in the process environment, or store that same name in DSH credentials. Restart `dsh web` if it is already running.
+
+## Install from a local checkout
 
 ```sh
 pnpm install
-pnpm run build
 dsh plugin --profile web add /absolute/path/to/dsh-jev
 ```
 
-From GitHub after you allow the `prepare` build:
+`pnpm install` runs `prepare`, which writes `dist/`.
 
-```sh
-dsh plugin --profile web add github:noetion/dsh-jev
-```
+## Call jev_ask
 
-Set `TYPESAFE_API_KEY` in the process environment, or store that same name in DSH credentials. The plugin reads the key on every call. It does not put the secret in `cordis.yml`.
+Ask the agent to call `jev_ask`, or invoke the bundled `jev` skill. The session LLM chooses the tool from the tool description and the skill. There is no hard interceptor.
 
-## Use
-
-Ask the agent to call `jev_ask`, or invoke the bundled `jev` skill. One call can mix question types over the same state.
+One call can mix question types over the same state.
 
 ```json
 {
@@ -47,7 +63,9 @@ Ask the agent to call `jev_ask`, or invoke the bundled `jev` skill. One call can
 }
 ```
 
-The tool result is the TypeSafe JSON. Your agent branches on `answers.<id>.noul`, `.choice`, `.score`, and `.confidence`.
+The tool result is the TypeSafe JSON. Branch on `answers.<id>.noul`, `.choice`, `.score`, and `.confidence`.
+
+Every call posts `state` to `https://api.typesafe.ai/v1/systemone`. Do not put secrets in `state`.
 
 ## Configure
 
@@ -57,7 +75,19 @@ Optional `cordis.yml` fields on the `jev` row:
 - `endpoint`, default `https://api.typesafe.ai/v1/systemone`
 - `apiKeyEnv`, default `TYPESAFE_API_KEY`
 
-## Develop
+The plugin reads the key on every call. It does not put the secret in `cordis.yml`.
+
+## Names
+
+- GitHub repository: `noetion/dsh-jev`
+- npm package name: `dsh-jev` (install from GitHub, not npm)
+- Plugin id: `jev`
+- Tool: `jev_ask`
+- Bundled skill: `jev`
+
+## Verify
+
+From a checkout:
 
 ```sh
 pnpm install
@@ -78,8 +108,16 @@ Install-and-load proof against a throwaway `DSH_HOME`:
 pnpm run verify-boot
 ```
 
-`@deepseek-ai/dsh-tools` is pinned to `0.1.5-rc.2` (the `next` dist-tag). npm `latest` is a stale `0.0.1-rc.1`. Do not replace the pin with an untagged install.
+`@deepseek-ai/dsh-tools` is pinned to `0.1.5-rc.2`. npm `latest` is a stale `0.0.1-rc.1`. Do not replace the pin with an untagged install.
 
 ## Why this is not an LLM adapter
 
 An LLM adapter must stream text and tool-call chunks. Jev answers typed questions. Wiring it as a chat provider would be a lie. The native DSH seam for Jev is a tool plus, when the profile has `ctx.skills`, a bundled skill.
+
+## License and support
+
+MIT. See `LICENSE`.
+
+Open a GitHub issue for bugs and questions. There is no response-time promise. Pull requests are welcome when they include `pnpm run check`.
+
+Report a vulnerability in [SECURITY.md](SECURITY.md).

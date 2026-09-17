@@ -73,3 +73,5 @@ For `choice`, include a no-match option when nothing may fit. For `score`, every
 - Combine answers in your own logic. Do not ask Jev to weigh independent factors in one question.
 
 If `jev_ask` fails because the API key is missing, tell the user to set `TYPESAFE_API_KEY` in the process environment or DSH credentials. Do not invent answers.
+
+Do not put API keys or other secrets in `state`. Every call posts the full state to `https://api.typesafe.ai/v1/systemone`.
