@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { userInfo } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -60,7 +60,7 @@ check(
 )
 check(
   'no_decisions_tsv',
-  !trackedFiles().includes('decisions.tsv') || !existsSync(join(root, 'decisions.tsv')),
+  !existsSync(join(root, 'decisions.tsv')),
   'lab decisions.tsv is not in the working tree',
 )
 
@@ -98,6 +98,15 @@ check(
   'prepare_script',
   pkg.scripts?.prepare === 'npm run build',
   'prepare builds dist for git installs',
+)
+
+// The test script names its files, so a new test file would otherwise never run.
+const testScript = pkg.scripts?.test ?? ''
+const testFiles = readdirSync(join(root, 'tests')).filter((name) => name.endsWith('.test.ts'))
+check(
+  'tests_listed',
+  testFiles.length > 0 && testFiles.every((name) => testScript.includes(`tests/${name}`)),
+  'every tests/*.test.ts file is named in the test script',
 )
 
 const full = process.argv.includes('--full')

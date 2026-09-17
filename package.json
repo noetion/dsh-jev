@@ -31,7 +31,7 @@
     "live": "node --experimental-strip-types scripts/live-smoke.ts",
     "verify-boot": "node --experimental-strip-types scripts/verify-boot.ts",
     "verify-git-install": "node --experimental-strip-types scripts/verify-git-install.ts",
-    "check": "npm run typecheck && npm run test && npm run build && npm run adopt-check",
+    "check": "npm run typecheck && npm run test && npm run build && npm run adopt-check -- --full",
     "adopt-check": "node --experimental-strip-types scripts/adopt-check.ts"
   },
   "engines": {
