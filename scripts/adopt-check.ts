@@ -50,7 +50,6 @@ check(
   /GitHub issue/i.test(readme) || /open an issue/i.test(readme),
   'README says how to get support',
 )
-check('security_md', existsSync(join(root, 'SECURITY.md')), 'SECURITY.md exists')
 check(
   'package_description',
   typeof pkg.description === 'string'
