@@ -16,8 +16,8 @@ const key = `dsh-jev@${spec}#${sha.stdout.trim()}`
 writeFileSync(join(dummy, 'package.json'), `${JSON.stringify({ name: 'dsh-jev-git-probe', private: true }, null, 2)}\n`)
 writeFileSync(join(dummy, 'pnpm-workspace.yaml'), `allowBuilds:\n  ${JSON.stringify(key)}: true\n`)
 
-// Node 22 and later refuse to spawn a .cmd shim without a shell, so run pnpm's JS
-// entry with the current node and fall back to the PATH shim only on POSIX.
+// Node 22 and later refuse to spawn a .cmd shim without a shell, so run pnpm's
+// JS entry with the current node, or a real executable found on PATH.
 function pnpmCli(): string | undefined {
   const binDirs = [
     join(dirname(process.execPath), 'node_modules', 'pnpm', 'bin'),
@@ -37,15 +37,12 @@ function pnpmCli(): string | undefined {
 
 function add(): { status: number | null; error?: string; output: string } {
   const cli = pnpmCli()
-  const result = cli === undefined
-    ? spawnSync(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm', ['add', spec], {
-      cwd: dummy,
-      encoding: 'utf8',
-    })
-    : spawnSync(process.execPath, [cli, 'add', spec], {
-      cwd: dummy,
-      encoding: 'utf8',
-    })
+  const command = cli === undefined ? (process.platform === 'win32' ? 'pnpm.exe' : 'pnpm') : process.execPath
+  const args = cli === undefined ? ['add', spec] : [cli, 'add', spec]
+  const result = spawnSync(command, args, {
+    cwd: dummy,
+    encoding: 'utf8',
+  })
   return {
     status: result.status,
     ...result.error ? { error: result.error.message } : {},
