@@ -1,10 +1,10 @@
 # dsh-jev
 
-dsh-jev is a DeepSeek Harness bundle that registers the `jev_ask` tool. On a profile that loads this bundle, a DSH agent can send typed noul, choice, and score questions to TypeSafe Jev.
+dsh-jev is a DeepSeek Harness bundle that registers the `jev_ask` tool. A DSH agent on a profile that loads it can send typed noul, choice, and score questions to TypeSafe Jev.
 
-Jev is TypeSafe's System One model. It returns structured answers. It does not generate chat or code.
+Jev is TypeSafe's System One model. It returns structured answers and does not generate chat or code.
 
-This package is version 0.1.0. It targets DSH `0.1.5-rc.2` (the npm `next` dist-tag), Node 22.19 through 22.x or Node 24 and later, and a TypeSafe API key.
+This package is version 0.1.0. It targets DSH `0.1.5-rc.2` from the npm `next` dist-tag, Node 22.19 or later on the 22.x line or Node 24 and later, and a TypeSafe API key.
 
 ## Install from GitHub
 
@@ -16,7 +16,7 @@ dsh plugin --profile web add github:noetion/dsh-jev#<commit>
 
 Replace `<commit>` with a SHA from `main`.
 
-The first add fails until pnpm allows this package's `prepare` script. Copy the exact key from the pnpm error into the profile's `pnpm-workspace.yaml` under `allowBuilds`. The key is often `dsh-jev`. Some pnpm versions print a longer `dsh-jev@github:...` key. Use that exact string.
+The first add fails until pnpm allows this package's `prepare` script. Copy the exact key from the pnpm error into the profile's `pnpm-workspace.yaml` under `allowBuilds`. It is often `dsh-jev`, and some pnpm versions print a longer `dsh-jev@github:...` form. Use the string pnpm printed.
 
 ```yaml
 allowBuilds:
@@ -25,7 +25,7 @@ allowBuilds:
 
 Then run the same `dsh plugin add` command again. Treat that allowlist as permission to run this package's build on your machine at install time.
 
-Set `TYPESAFE_API_KEY` in the process environment, or store that same name in DSH credentials. Restart `dsh web` if it is already running.
+Set `TYPESAFE_API_KEY` in the process environment, or store it in DSH credentials under the same name. Restart `dsh web` if it is running.
 
 ## Install from a local checkout
 
@@ -38,7 +38,7 @@ dsh plugin --profile web add /absolute/path/to/dsh-jev
 
 ## Call jev_ask
 
-Ask the agent to call `jev_ask`, or invoke the bundled `jev` skill. The session LLM chooses the tool from the tool description and the skill. There is no hard interceptor.
+Ask the agent to call `jev_ask`, or invoke the bundled `jev` skill. The session LLM decides when to call the tool. The plugin does not force it.
 
 One call can mix question types over the same state.
 
@@ -80,7 +80,7 @@ The plugin reads the key on every call. It does not put the secret in `cordis.ym
 ## Names
 
 - GitHub repository: `noetion/dsh-jev`
-- npm package name: `dsh-jev` (install from GitHub, not npm)
+- Package name: `dsh-jev`, installed from GitHub rather than npm
 - Plugin id: `jev`
 - Tool: `jev_ask`
 - Bundled skill: `jev`
@@ -108,7 +108,7 @@ Install-and-load proof against a throwaway `DSH_HOME`. Set `DSH_BIN` to use a ds
 pnpm run verify-boot
 ```
 
-Proof that a pnpm git install of this checkout builds `dist/`, and the `allowBuilds` key that install asks for. The spec is the local directory over `git+file://`, so the key it prints is not the key a GitHub install asks for:
+This one installs the checkout over `git+file://` and checks that the build wrote `dist/`. It also prints the `allowBuilds` key that install asks for, which is not the key a GitHub install asks for:
 
 ```sh
 pnpm run verify-git-install
@@ -118,12 +118,12 @@ pnpm run verify-git-install
 
 ## Why this is not an LLM adapter
 
-An LLM adapter must stream text and tool-call chunks. Jev returns typed answers and cannot stream, so it cannot be one. The native DSH seam for Jev is a tool, plus a bundled skill when the profile has `ctx.skills`.
+An LLM adapter must stream text and tool-call chunks. Jev returns typed answers and cannot stream, so it cannot be one. The plugin registers a tool, and a bundled skill when the profile has `ctx.skills`.
 
 ## License and support
 
 MIT. See `LICENSE`.
 
-Open a GitHub issue for bugs and questions. There is no response-time promise. Pull requests are welcome when they include `pnpm run check`.
+Open a GitHub issue for bugs and questions. There is no response-time promise. Pull requests are welcome if they include `pnpm run check`.
 
-Report a vulnerability in [SECURITY.md](SECURITY.md).
+Report a vulnerability through a private GitHub security advisory rather than a public issue.
