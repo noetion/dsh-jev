@@ -99,9 +99,7 @@ export function apply(ctx: Context, config?: PluginConfig): void {
     skills.registerProvider(() => createSkillProvider())
   }
 
-  const listed = ctx.tools.get('jev_ask') !== undefined
-  console.log(`[jev] registered jev_ask listed=${listed}`)
-  if (!listed) {
+  if (ctx.tools.get('jev_ask') === undefined) {
     throw new JevParseError('tools', 'jev_ask did not land in the registry')
   }
 }
