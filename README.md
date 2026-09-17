@@ -63,7 +63,7 @@ One call can mix question types over the same state.
 }
 ```
 
-The tool result is the TypeSafe JSON. Branch on `answers.<id>.noul`, `.choice`, `.score`, and `.confidence`.
+The tool result is the TypeSafe JSON. A `noul` answer carries a probability in `noul`. A `choice` or `score` answer carries `probabilities` and `confidence`.
 
 Every call posts `state` to `https://api.typesafe.ai/v1/systemone`. Do not put secrets in `state`.
 
@@ -102,13 +102,13 @@ Live TypeSafe proof, with a key in `TYPESAFE_API_KEY` or in the file named by `T
 pnpm run live
 ```
 
-Install-and-load proof against a throwaway `DSH_HOME`:
+Install-and-load proof against a throwaway `DSH_HOME`. Set `DSH_BIN` to use a dsh binary you already have instead of fetching one:
 
 ```sh
 pnpm run verify-boot
 ```
 
-Proof that a git install builds `dist/` and that pnpm accepts the `allowBuilds` key:
+Proof that a pnpm git install of this checkout builds `dist/`, and the `allowBuilds` key that install asks for. The spec is the local directory over `git+file://`, so the key it prints is not the key a GitHub install asks for:
 
 ```sh
 pnpm run verify-git-install
