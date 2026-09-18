@@ -1,9 +1,11 @@
-# dsh-jev bundle layer — applied when a profile lists this bundle
-# (package.json declares `dsh.bundle.patch` pointing at this file).
+# dsh-jev bundle layer. A profile applies this file when it lists the
+# bundle, because package.json points `dsh.bundle.patch` at it.
 #
-# PITFALL: `name` is a PACKAGE NAME (resolved through the profile's node_modules
-# or the installation fallback `$DSH_HOME/profiles/node_modules`), NOT a
-# relative path. `dsh-jev` is this package's main entry (→ dist/index.js).
+# `name` is a module specifier. This file uses the package name `dsh-jev`,
+# which resolves to this package's dist/index.js. A bare value resolves as a
+# package name from the profile's node_modules or
+# `$DSH_HOME/profiles/node_modules`. A value that is absolute or starts with
+# `./` or `../` is anchored beside this file instead.
 - insert:
     - id: jev
       name: dsh-jev
