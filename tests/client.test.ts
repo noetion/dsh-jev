@@ -92,3 +92,41 @@ test('throws JevHttpError on 422 without retrying', async () => {
   )
   assert.equal(calls, 1)
 })
+
+test('does not issue a request when the caller signal is already aborted', async () => {
+  let calls = 0
+  await assert.rejects(
+    () => evaluateJev({
+      request,
+      apiKey: 'test-key',
+      signal: AbortSignal.abort(),
+      fetchImpl: async () => {
+        calls += 1
+        throw new Error('should not fetch')
+      },
+    }),
+    (error: unknown) => error instanceof Error && error.name === 'AbortError',
+  )
+  assert.equal(calls, 0)
+})
+
+test('stops during retry backoff when the caller aborts', async () => {
+  const controller = new AbortController()
+  let calls = 0
+  const result = evaluateJev({
+    request,
+    apiKey: 'test-key',
+    signal: controller.signal,
+    fetchImpl: async () => {
+      calls += 1
+      return { ok: false, status: 500, text: async () => 'try later' }
+    },
+  })
+  setTimeout(() => controller.abort(), 20)
+
+  await assert.rejects(
+    () => result,
+    (error: unknown) => error instanceof Error && error.name === 'AbortError',
+  )
+  assert.equal(calls, 1)
+})
