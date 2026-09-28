@@ -1,3 +1,4 @@
+import { setTimeout as sleep } from 'node:timers/promises'
 import {
   JevParseError,
   parseResult,
@@ -42,10 +43,6 @@ export class JevAuthError extends Error {
   }
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
 export async function evaluateJev(options: {
   request: JevRequest
   apiKey: string
@@ -55,6 +52,7 @@ export async function evaluateJev(options: {
   attempt?: number
   envName?: string
 }): Promise<JevResult> {
+  options.signal?.throwIfAborted()
   const envName = options.envName ?? 'TYPESAFE_API_KEY'
   if (options.apiKey.trim() === '') {
     throw new JevAuthError(envName)
@@ -75,14 +73,14 @@ export async function evaluateJev(options: {
     })
   } catch (cause) {
     if (attempt < 3 && options.signal?.aborted !== true) {
-      await sleep(400 * (attempt + 1))
+      await sleep(400 * (attempt + 1), undefined, { signal: options.signal })
       return evaluateJev({ ...options, attempt: attempt + 1 })
     }
     throw cause
   }
   const text = await response.text()
   if ((response.status === 429 || response.status === 529 || response.status >= 500) && attempt < 3) {
-    await sleep(600 * 2 ** attempt)
+    await sleep(600 * 2 ** attempt, undefined, { signal: options.signal })
     return evaluateJev({ ...options, attempt: attempt + 1 })
   }
   if (response.status === 401) {
