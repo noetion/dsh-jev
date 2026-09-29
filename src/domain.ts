@@ -90,11 +90,9 @@ function asJsonValue(value: unknown, field: string): JsonValue {
     return value.map((item, index) => asJsonValue(item, `${field}[${index}]`))
   }
   if (isRecord(value)) {
-    const out: { [key: string]: JsonValue } = {}
-    for (const [key, item] of Object.entries(value)) {
-      out[key] = asJsonValue(item, `${field}.${key}`)
-    }
-    return out
+    return Object.fromEntries(Object.entries(value).map(([key, item]) =>
+      [key, asJsonValue(item, `${field}.${key}`)],
+    ))
   }
   throw new JevParseError(field, 'state must be JSON')
 }
@@ -137,13 +135,12 @@ function parseChoice(raw: Record<string, unknown>, field: string): ChoiceQuestio
   if (!isRecord(raw.criteria)) {
     throw new JevParseError(`${field}.criteria`, 'choice criteria must be an object')
   }
-  const criteria: Record<string, string | null> = {}
-  for (const [key, description] of Object.entries(raw.criteria)) {
+  const criteria: Record<string, string | null> = Object.fromEntries(Object.entries(raw.criteria).map(([key, description]) => {
     if (description !== null && typeof description !== 'string') {
       throw new JevParseError(`${field}.criteria.${key}`, 'must be a string or null')
     }
-    criteria[key] = description
-  }
+    return [key, description]
+  }))
   if (Object.keys(criteria).length < 2) {
     throw new JevParseError(`${field}.criteria`, 'choice needs at least two options')
   }
@@ -186,13 +183,12 @@ export function parseQuestions(value: unknown, field = 'questions'): Record<stri
   if (!isRecord(value)) {
     throw new JevParseError(field, 'questions must be an object')
   }
-  const questions: Record<string, JevQuestion> = {}
-  for (const [id, question] of Object.entries(value)) {
+  const questions: Record<string, JevQuestion> = Object.fromEntries(Object.entries(value).map(([id, question]) => {
     if (id.trim() === '') {
       throw new JevParseError(field, 'question ids must be non-empty')
     }
-    questions[id] = parseQuestion(question, `${field}.${id}`)
-  }
+    return [id, parseQuestion(question, `${field}.${id}`)]
+  }))
   if (Object.keys(questions).length === 0) {
     throw new JevParseError(field, 'ask at least one question')
   }
@@ -225,14 +221,12 @@ function parseProbabilities(value: unknown, field: string): Record<string, numbe
   if (!isRecord(value)) {
     throw new JevParseError(field, 'must be an object of numbers')
   }
-  const probabilities: Record<string, number> = {}
-  for (const [key, item] of Object.entries(value)) {
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => {
     if (typeof item !== 'number' || !Number.isFinite(item)) {
       throw new JevParseError(`${field}.${key}`, 'must be a finite number')
     }
-    probabilities[key] = item
-  }
-  return probabilities
+    return [key, item]
+  }))
 }
 
 function parseNoulAnswer(raw: Record<string, unknown>, field: string): NoulAnswer {
@@ -258,13 +252,12 @@ function parseScoreAnswer(raw: Record<string, unknown>, field: string): ScoreAns
   if (!isRecord(raw.legend)) {
     throw new JevParseError(`${field}.legend`, 'must be an object')
   }
-  const legend: Record<string, string> = {}
-  for (const [key, item] of Object.entries(raw.legend)) {
+  const legend: Record<string, string> = Object.fromEntries(Object.entries(raw.legend).map(([key, item]) => {
     if (typeof item !== 'string') {
       throw new JevParseError(`${field}.legend.${key}`, 'must be a string')
     }
-    legend[key] = item
-  }
+    return [key, item]
+  }))
   return {
     type: 'score',
     score: raw.score,
@@ -294,17 +287,17 @@ export function parseResult(value: unknown, asked: Record<string, JevQuestion>):
   if (!isRecord(value.answers)) {
     throw new JevParseError('answers', 'answers must be an object')
   }
-  const answers: Record<string, JevAnswer> = {}
-  for (const id of Object.keys(asked)) {
-    if (!(id in value.answers)) {
+  const rawAnswers = value.answers
+  const answers: Record<string, JevAnswer> = Object.fromEntries(Object.keys(asked).map((id) => {
+    if (!Object.hasOwn(rawAnswers, id)) {
       throw new JevParseError(`answers.${id}`, 'missing answer for asked question')
     }
-    const answer = parseAnswer(value.answers[id], `answers.${id}`)
+    const answer = parseAnswer(rawAnswers[id], `answers.${id}`)
     if (answer.type !== asked[id].type) {
       throw new JevParseError(`answers.${id}.type`, `expected ${asked[id].type}`)
     }
-    answers[id] = answer
-  }
+    return [id, answer]
+  }))
   let usage: JevUsage | undefined
   if (value.usage !== undefined) {
     if (!isRecord(value.usage)) {
@@ -343,10 +336,9 @@ export function toWireQuestion(question: JevQuestion): Record<string, unknown> {
 }
 
 export function toWireBody(request: JevRequest): Record<string, unknown> {
-  const questions: Record<string, unknown> = {}
-  for (const [id, question] of Object.entries(request.questions)) {
-    questions[id] = toWireQuestion(question)
-  }
+  const questions = Object.fromEntries(Object.entries(request.questions).map(([id, question]) =>
+    [id, toWireQuestion(question)],
+  ))
   return {
     state: request.state,
     model: request.model,
