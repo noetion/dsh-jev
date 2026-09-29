@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
-import { userInfo } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { hasPrivateHostPath } from './private-paths.ts'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -63,33 +63,11 @@ check(
   'lab decisions.tsv is not in the working tree',
 )
 
-function localUserNames(): string[] {
-  const candidates: Array<string | undefined> = [process.env.USERNAME, process.env.USER]
-  try {
-    candidates.push(userInfo().username)
-  } catch {
-    // userInfo() throws where the platform has no passwd entry; the env vars cover that.
-  }
-  return [...new Set(
-    candidates
-      .filter((name): name is string => typeof name === 'string' && name.trim().length >= 3)
-      .map((name) => name.trim().toLowerCase()),
-  )]
-}
-
-const userNames = localUserNames()
-
 const hostHit = trackedFiles().flatMap((file) => {
   const path = join(root, file)
   if (!existsSync(path)) return []
   const text = read(file)
-  const lowered = text.toLowerCase()
-  const hits: string[] = []
-  if (userNames.some((name) => lowered.includes(name))) hits.push(`${file}:username`)
-  if (/C:\\Users\\/i.test(text)) hits.push(`${file}:C:\\Users`)
-  if (/\/Users\/[A-Za-z]/.test(text)) hits.push(`${file}:/Users`)
-  if (/\/home\/[A-Za-z]/.test(text)) hits.push(`${file}:/home`)
-  return hits
+  return hasPrivateHostPath(text) ? [`${file}:private-home-path`] : []
 })
 check('no_host_paths', hostHit.length === 0, hostHit.join(', ') || 'no host paths in tracked files')
 

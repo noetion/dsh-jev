@@ -27,7 +27,7 @@
     "build": "tsc -p tsconfig.json && node scripts/copy-skills.mjs",
     "prepare": "npm run build",
     "typecheck": "tsc -p tsconfig.check.json",
-    "test": "node --experimental-strip-types --test tests/domain.test.ts tests/client.test.ts tests/plugin.test.ts tests/apply.test.ts",
+    "test": "node --experimental-strip-types --test tests/domain.test.ts tests/client.test.ts tests/plugin.test.ts tests/apply.test.ts tests/adopt-check.test.ts",
     "live": "node --experimental-strip-types scripts/live-smoke.ts",
     "verify-boot": "node --experimental-strip-types scripts/verify-boot.ts",
     "verify-git-install": "node --experimental-strip-types scripts/verify-git-install.ts",
